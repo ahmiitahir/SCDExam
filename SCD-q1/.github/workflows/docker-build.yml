@@ -1,0 +1,43 @@
+name: Build Microservices Docker Images 
+
+on: 
+   push: 
+     branches: [ main ] 
+   pull_request: 
+     branches: [ main ] 
+jobs: 
+   build-and-test: 
+     runs-on: ubuntu-latest 
+
+     services: 
+        mongo: 
+          image: mongo:latest  
+          ports: 
+                - 27017:27017 
+
+     strategy: 
+
+        matrix:
+            service: [Auth, Blog, Comment, Profile] 
+
+     steps: 
+        - name: Checkout repository 
+          uses: actions/checkout@v3 
+
+        - name: Set up Node.js 
+          uses: actions/setup-node@v3 
+          with: 
+             node-version: 18 
+                            
+
+        - name: Build Docker image for ${{ matrix.service }} 
+          working-directory: ${{ matrix.service }} 
+          run: | 
+              docker build -t scdq1-${{ matrix.service}} . 
+
+        - name: Run tests for ${{ matrix.service }} (if any) 
+
+          working-directory: ${{ matrix.service }} 
+          run: | 
+            npm install 
+          # npm test (uncomment if you have tests)
